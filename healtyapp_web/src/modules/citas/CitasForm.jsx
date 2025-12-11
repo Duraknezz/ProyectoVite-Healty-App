@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  createCita,
-  fetchCitaById,
-  updateCita,
-} from "./citas.api";
+import { createCita, fetchCitaById, updateCita } from "./citas.api";
 import { fetchPacientes } from "../pacientes/pacientes.api";
+
+import "./citas.css"; // estilos
 
 export default function CitaForm() {
   const { id } = useParams();
@@ -21,19 +19,15 @@ export default function CitaForm() {
     motivo: "",
   });
 
-  const [cargandoInicial, setCargandoInicial] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
 
   async function cargarPacientes() {
     try {
-      console.log("📥 Cargando pacientes...");
       const data = await fetchPacientes({ page: 1, search: "" });
-      console.log("👥 Pacientes recibidos:", data.resultados);
       setPacientes(data.resultados);
     } catch (e) {
-      console.error("❌ Error cargando pacientes:", e);
-      setError("No se pudieron cargar los pacientes.");
+      setError("Error cargando pacientes",e);
     }
   }
 
@@ -41,10 +35,8 @@ export default function CitaForm() {
     if (!esEdicion) return;
 
     try {
-      setCargandoInicial(true);
-      console.log(`📥 Cargando cita ID ${id}`);
+      setCargando(true);
       const data = await fetchCitaById(id);
-      console.log("🟦 Cita recibida:", data);
 
       setForm({
         paciente: data.pacienteId,
@@ -55,10 +47,9 @@ export default function CitaForm() {
       });
 
     } catch (e) {
-      console.error("❌ Error cargando cita:", e);
-      setError("No se pudo cargar la información de la cita.");
+      setError("Error cargando cita",e);
     } finally {
-      setCargandoInicial(false);
+      setCargando(false);
     }
   }
 
@@ -69,75 +60,43 @@ export default function CitaForm() {
 
   function handleChange(e) {
     const { name, value } = e.target;
-    console.log(`✏️ Cambio en el form: ${name} = ${value}`);
-
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((f) => ({ ...f, [name]: value }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true);
-    setError("");
 
-    const citaData = {
+    const payload = {
       paciente: Number(form.paciente),
       fecha: form.fecha,
       hora: form.hora,
       tipo: form.tipo,
       motivo: form.motivo,
-      estado: "pendiente", // valor válido en tu backend
+      estado: "pendiente",
     };
 
-    console.log("📤 Enviando cita al backend:", citaData);
-
     try {
-      let response;
-
-      if (esEdicion) {
-        console.log("🔧 EDITANDO CITA ID:", id);
-        response = await updateCita(id, citaData);
-      } else {
-        console.log("🆕 CREANDO NUEVA CITA");
-        response = await createCita(citaData);
-      }
-
-      console.log("🟢 Respuesta del backend:", response);
+      if (esEdicion) await updateCita(id, payload);
+      else await createCita(payload);
 
       navigate("/citas");
-
     } catch (e) {
-      console.error("❌ ERROR en handleSubmit:", e);
-
-      if (e.response) {
-        console.error("📩 Error detallado del backend:", e.response.data);
-        console.error("📄 Status:", e.response.status);
-      }
-
-      setError("Ocurrió un error al guardar la cita.");
-    } finally {
-      setLoading(false);
+      setError("Error guardando cita",e);
     }
   }
 
-  if (cargandoInicial) {
-    return <p>Cargando información...</p>;
-  }
+  if (cargando) return <p>Cargando...</p>;
 
   return (
-    <div>
-      <h2>{esEdicion ? "Editar cita" : "Nueva cita"}</h2>
+    <div className="citas-container">
+      <h2 className="citas-title">{esEdicion ? "Editar cita" : "Nueva cita"}</h2>
 
       {error && <p>{error}</p>}
 
-      <form onSubmit={handleSubmit}>
+      <form className="form-container" onSubmit={handleSubmit}>
         <div>
           <label>Paciente</label>
-          <select
-            name="paciente"
-            value={form.paciente}
-            onChange={handleChange}
-            required
-          >
+          <select name="paciente" value={form.paciente} onChange={handleChange} required>
             <option value="">Selecciona un paciente</option>
             {pacientes.map((pac) => (
               <option key={pac.id} value={pac.id}>
@@ -149,34 +108,17 @@ export default function CitaForm() {
 
         <div>
           <label>Fecha</label>
-          <input
-            type="date"
-            name="fecha"
-            value={form.fecha}
-            onChange={handleChange}
-            required
-          />
+          <input type="date" name="fecha" value={form.fecha} onChange={handleChange} required />
         </div>
 
         <div>
           <label>Hora</label>
-          <input
-            type="time"
-            name="hora"
-            value={form.hora}
-            onChange={handleChange}
-            required
-          />
+          <input type="time" name="hora" value={form.hora} onChange={handleChange} required />
         </div>
 
         <div>
           <label>Tipo de cita</label>
-          <select
-            name="tipo"
-            value={form.tipo}
-            onChange={handleChange}
-            required
-          >
+          <select name="tipo" value={form.tipo} onChange={handleChange} required>
             <option value="">Selecciona un tipo</option>
             <option value="primera">Primera vez</option>
             <option value="seguimiento">Seguimiento</option>
@@ -185,21 +127,17 @@ export default function CitaForm() {
 
         <div>
           <label>Motivo</label>
-          <textarea
-            name="motivo"
-            value={form.motivo}
-            onChange={handleChange}
-            required
-          />
+          <textarea name="motivo" value={form.motivo} onChange={handleChange} required />
         </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Guardando..." : "Guardar"}
-        </button>
-
-        <button type="button" onClick={() => navigate("/citas")}>
-          Cancelar
-        </button>
+        <div className="form-buttons">
+          <button className="btn btn-save" type="submit">
+            Guardar
+          </button>
+          <button className="btn btn-cancel" type="button" onClick={() => navigate("/citas")}>
+            Cancelar
+          </button>
+        </div>
       </form>
     </div>
   );
