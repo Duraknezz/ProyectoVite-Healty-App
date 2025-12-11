@@ -19,7 +19,6 @@ export default function CitaForm() {
     hora: "",
     tipo: "",
     motivo: "",
-    notas: "",
   });
 
   const [cargandoInicial, setCargandoInicial] = useState(false);
@@ -28,10 +27,13 @@ export default function CitaForm() {
 
   async function cargarPacientes() {
     try {
+      console.log("📥 Cargando pacientes...");
       const data = await fetchPacientes({ page: 1, search: "" });
+      console.log("👥 Pacientes recibidos:", data.resultados);
       setPacientes(data.resultados);
     } catch (e) {
-      setError("No se pudieron cargar los pacientes.",e);
+      console.error("❌ Error cargando pacientes:", e);
+      setError("No se pudieron cargar los pacientes.");
     }
   }
 
@@ -40,17 +42,21 @@ export default function CitaForm() {
 
     try {
       setCargandoInicial(true);
+      console.log(`📥 Cargando cita ID ${id}`);
       const data = await fetchCitaById(id);
+      console.log("🟦 Cita recibida:", data);
+
       setForm({
         paciente: data.pacienteId,
         fecha: data.fecha,
         hora: data.hora,
         tipo: data.tipo,
         motivo: data.motivo,
-        notas: data.notas || "",
       });
+
     } catch (e) {
-      setError("No se pudo cargar la información de la cita.",e);
+      console.error("❌ Error cargando cita:", e);
+      setError("No se pudo cargar la información de la cita.");
     } finally {
       setCargandoInicial(false);
     }
@@ -59,10 +65,12 @@ export default function CitaForm() {
   useEffect(() => {
     cargarPacientes();
     cargarCita();
-  }, [id, esEdicion]);
+  }, [id]);
 
   function handleChange(e) {
     const { name, value } = e.target;
+    console.log(`✏️ Cambio en el form: ${name} = ${value}`);
+
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
@@ -72,23 +80,40 @@ export default function CitaForm() {
     setError("");
 
     const citaData = {
-      paciente: form.paciente,
+      paciente: Number(form.paciente),
       fecha: form.fecha,
       hora: form.hora,
       tipo: form.tipo,
       motivo: form.motivo,
-      notas: form.notas,
+      estado: "pendiente", // valor válido en tu backend
     };
 
+    console.log("📤 Enviando cita al backend:", citaData);
+
     try {
+      let response;
+
       if (esEdicion) {
-        await updateCita(id, citaData);
+        console.log("🔧 EDITANDO CITA ID:", id);
+        response = await updateCita(id, citaData);
       } else {
-        await createCita(citaData);
+        console.log("🆕 CREANDO NUEVA CITA");
+        response = await createCita(citaData);
       }
+
+      console.log("🟢 Respuesta del backend:", response);
+
       navigate("/citas");
+
     } catch (e) {
-      setError("Ocurrió un error al guardar la cita.",e);
+      console.error("❌ ERROR en handleSubmit:", e);
+
+      if (e.response) {
+        console.error("📩 Error detallado del backend:", e.response.data);
+        console.error("📄 Status:", e.response.status);
+      }
+
+      setError("Ocurrió un error al guardar la cita.");
     } finally {
       setLoading(false);
     }
@@ -153,8 +178,8 @@ export default function CitaForm() {
             required
           >
             <option value="">Selecciona un tipo</option>
-            <option value="Primera vez">Primera vez</option>
-            <option value="Seguimiento">Seguimiento</option>
+            <option value="primera">Primera vez</option>
+            <option value="seguimiento">Seguimiento</option>
           </select>
         </div>
 
@@ -165,15 +190,6 @@ export default function CitaForm() {
             value={form.motivo}
             onChange={handleChange}
             required
-          />
-        </div>
-
-        <div>
-          <label>Notas</label>
-          <textarea
-            name="notas"
-            value={form.notas}
-            onChange={handleChange}
           />
         </div>
 

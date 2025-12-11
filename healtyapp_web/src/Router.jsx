@@ -62,7 +62,7 @@ return (
                 path="/citas/nueva"
                 element={
                     <PrivateRoute>
-                        <CitaForm />
+                        <CitasForm />
                     </PrivateRoute>
                 }
             />
@@ -70,7 +70,7 @@ return (
                 path="/citas/:id/editar"
                 element={
                     <PrivateRoute>
-                        <CitaForm />
+                        <CitasForm />
                     </PrivateRoute>
                 }
             />

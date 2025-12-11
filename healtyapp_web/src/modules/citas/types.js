@@ -6,7 +6,6 @@ export function mapCitaFromApi(apiCita) {
     fecha: apiCita.fecha,
     hora: apiCita.hora,
     motivo: apiCita.motivo,
-    notas: apiCita.notas,
     tipo: apiCita.tipo,                        // "Primera vez" o "Seguimiento"
   };
 }

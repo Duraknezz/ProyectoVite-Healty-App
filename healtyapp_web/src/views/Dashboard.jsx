@@ -8,6 +8,7 @@ export default function Dashboard() {
       <h2>Panel Principal</h2>
       <p>Bienvenido al sistema web de HealtyApp.</p>
       <button onClick={() => navigate("/pacientes")}>Ir a Pacientes</button>
+      <button onClick={() => navigate("/citas")}>Ir a Citas</button>
     </div>
   );
 }

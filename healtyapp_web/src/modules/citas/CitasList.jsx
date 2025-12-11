@@ -124,8 +124,8 @@ export default function CitasList() {
           style={{ marginLeft: "0.5rem" }}
         >
           <option value="">Todos los tipos</option>
-          <option value="Primera vez">Primera vez</option>
-          <option value="Seguimiento">Seguimiento</option>
+          <option value="primera">Primera vez</option>
+          <option value="seguimiento">Seguimiento</option>
         </select>
 
         <input
