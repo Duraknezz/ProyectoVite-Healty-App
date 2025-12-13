@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { fetchCitas, deleteCita } from "./citas.api";
 import { fetchPacientes } from "../pacientes/pacientes.api";
 
-import "./citas.css"; // estilos
+import "./citas.css";
 
 export default function CitasList() {
   const navigate = useNavigate();
@@ -24,40 +24,24 @@ export default function CitasList() {
   const pageSize = 10;
   const totalPaginas = Math.ceil(total / pageSize);
 
-  async function cargarPacientes() {
-    try {
-      const data = await fetchPacientes({ page: 1, search: "" });
-      setPacientes(data.resultados);
-    } catch (e) {
-      console.error("Error cargando pacientes:", e);
+  // ----------------------------
+  // CARGAR PACIENTES
+  // ----------------------------
+  useEffect(() => {
+    async function cargar() {
+      try {
+        const data = await fetchPacientes({ page: 1, search: "" });
+        setPacientes(data.resultados);
+      } catch (e) {
+        console.error("Error cargando pacientes:", e);
+      }
     }
-  }
+    cargar();
+  }, []);
 
-  async function cargarCitas() {
-    setLoading(true);
-    setError("");
-
-    try {
-      const data = await fetchCitas({
-        page,
-        pacienteId,
-        tipo,
-        fechaInicio,
-        fechaFin,
-      });
-
-      setCitas(data.resultados);
-      setTotal(data.total);
-    } catch (error) {
-      console.error("Error cargando citas:", error);
-      setError("Error al cargar citas");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => cargarPacientes(), []);
-
+  // ----------------------------
+  // CARGAR CITA SI VENÍA DESDE /pacientes/:id
+  // ----------------------------
   useEffect(() => {
     if (pacienteRutaId) {
       setPacienteId(pacienteRutaId);
@@ -65,8 +49,40 @@ export default function CitasList() {
     }
   }, [pacienteRutaId]);
 
-  useEffect(() => cargarCitas(), [page, pacienteId, tipo, fechaInicio, fechaFin]);
 
+  // ----------------------------
+  // CARGAR CITAS
+  // ----------------------------
+  useEffect(() => {
+    async function cargar() {
+      setLoading(true);
+      setError("");
+
+      try {
+        const data = await fetchCitas({
+          page,
+          pacienteId,
+          tipo,
+          fechaInicio,
+          fechaFin,
+        });
+
+        setCitas(data.resultados);
+        setTotal(data.total);
+      } catch (e) {
+        console.error("Error cargando citas:", e);
+        setError("Error al cargar citas");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    cargar();
+  }, [page, pacienteId, tipo, fechaInicio, fechaFin]);
+
+  // ----------------------------
+  // ACCIONES
+  // ----------------------------
   function handleNuevaCita() {
     navigate("/citas/nueva");
   }
@@ -80,7 +96,8 @@ export default function CitasList() {
 
     try {
       await deleteCita(id);
-      cargarCitas();
+      // recargar lista
+      setPage(1);
     } catch (error) {
       alert("Error eliminando cita",error);
     }

@@ -91,3 +91,25 @@
   margin-bottom: 1rem;
   border-radius: 4px;
 }
+
+
+.tarjeta-detalle {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  padding: 1.2rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+}
+
+.tarjeta-detalle h3 {
+  margin-top: 0;
+  margin-bottom: 0.7rem;
+  font-size: 20px;
+  color: #333;
+}
+
+.tarjeta-detalle p {
+  margin: 4px 0;
+  line-height: 1.4;
+}

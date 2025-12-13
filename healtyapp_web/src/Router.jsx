@@ -6,6 +6,10 @@ import PacientesList from "./modules/pacientes/PacientesListF";
 import PacienteForm from "./modules/pacientes/PacienteForm";
 import CitasForm from "./modules/citas/CitasForm";
 import CitasList from "./modules/citas/CitasList";
+import PlanList from "./modules/plan/planList";
+import PlanForm from "./modules/plan/planForm";
+import PlanDetail from "./modules/plan/planDetail";
+import Reportes from "./modules/reportes/Reportes";
 
 
 function PrivateRoute({ children }) {
@@ -82,6 +86,11 @@ return (
                     </PrivateRoute>
                 }
             />
+            <Route path="/plan" element={<PrivateRoute><PlanList/></PrivateRoute>} />
+            <Route path="/plan/nuevo" element={<PrivateRoute><PlanForm/></PrivateRoute>} />
+            <Route path="/plan/:id/editar" element={<PrivateRoute><PlanForm/></PrivateRoute>} />
+            <Route path="/plan/:id" element={<PlanDetail />} />
+            <Route path="/reportes" element={<PrivateRoute><Reportes /></PrivateRoute>} />
         </Routes>
     </BrowserRouter>
 );
